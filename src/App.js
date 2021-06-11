@@ -9,11 +9,15 @@ import {
 import Infobox from "./Infobox";
 import "./App.css";
 import Map from "./Map";
+import Table from "./Table";
+import { sortData } from "./util";
+import LineGraph from "./LineGraph";
 
 function App() {
   const [countries, setCountries] = useState([]);
-  const [country, setCountry] = useState("worldwide");
+  const [country, setInputCountry] = useState("worldwide");
   const [countryInfo, setCountryInfo] = useState({});
+  const [tableData, setTableData] = useState([]);
 
   //API LINK https://disease.sh/v3/covid-19/counrties
   useEffect(() => {
@@ -34,6 +38,8 @@ function App() {
             value: country.countryInfo.iso2, // uk,usa,india
           }));
 
+          const sortedData = sortData(data);
+          setTableData(sortedData);
           setCountries(countries);
         });
     };
@@ -43,17 +49,17 @@ function App() {
   const onCountryChange = async (event) => {
     const countryCode = event.target.value;
 
-    setCountry(countryCode);
+    setInputCountry(countryCode);
 
     const url =
       countryCode === "worldwide"
         ? "https://disease.sh/v3/covid-19/all"
-        : `https://disease.sh/v3/covid-19/${countryCode}`;
+        : `https://disease.sh/v3/covid-19/countries/${countryCode}`;
 
     await fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setCountry(countryCode);
+        setInputCountry(countryCode);
         setCountryInfo(data);
       });
   };
@@ -112,7 +118,9 @@ function App() {
         <Card className="app__right">
           <CardContent>
             <h3>Live Cases by Country</h3>
+            <Table countries={tableData} />
             <h3>Worldwide new cases</h3>
+            <LineGraph  />
           </CardContent>
         </Card>
       </div>
